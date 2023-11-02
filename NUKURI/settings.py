@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-c*#l91i+pan3il0k%!0vi)stv8m!ve-t=4$x4gzdw09s^kugb_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -56,7 +56,9 @@ ROOT_URLCONF = 'NUKURI.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [ 
+           BASE_DIR / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,6 +101,18 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    {
+       'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+       'OPTIONS': {
+           'min_length': 8,
+       }
+   },
+   {
+       'NAME': 'authentification.validators.ContainsLetterValidator',
+   },
+   {
+        'NAME': 'authentification.validators.ContainsNumberValidator',
+    },
 ]
 
 
@@ -123,3 +137,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = "authentification.user"
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = LOGIN_URL
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR /('media/')
