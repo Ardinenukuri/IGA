@@ -1,15 +1,18 @@
 from django.shortcuts import redirect,  render
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.forms import formset_factory
 from . import forms
 from django.shortcuts import get_object_or_404
 
+
 from . import models
 
 @login_required
+@permission_required('blog.add_photo', raise_exception=True)
 def home(request):
     photos = models.Photo.objects.all()
     return render(request, 'iga/home.html', context={'photos': photos})
+
 
 @login_required
 def photo_upload(request):
@@ -26,6 +29,7 @@ def photo_upload(request):
     return render(request, 'iga/photo_upload.html', context={'form': form})
 
 @login_required
+@permission_required(['blog.add_photo', 'blog.add_blog'])
 def blog_and_photo_upload(request):
     blog_form = forms.BlogForm()
     photo_form = forms.PhotoForm()
@@ -59,6 +63,7 @@ def home(request):
     return render(request, 'iga/home.html', context={'photos': photos, 'blogs': blogs})
 
 @login_required
+@permission_required('blog.change_blog')
 def edit_blog(request, blog_id):
    blog = get_object_or_404(models.Blog, id=blog_id)
    edit_form = forms.BlogForm(instance=blog)
@@ -81,6 +86,7 @@ def edit_blog(request, blog_id):
    return render(request, 'iga/edit_blog.html', context=context)
 
 @login_required
+@permission_required('blog.add_photo')
 def create_multiple_photos(request):
     PhotoFormSet = formset_factory(forms.PhotoForm, extra=5)
     formset = PhotoFormSet()
@@ -94,3 +100,13 @@ def create_multiple_photos(request):
                     photo.save()
             return redirect('home')
     return render(request, 'iga/create_multiple_photos.html', {'formset': formset})
+
+@login_required
+def follow_users(request):
+    form = forms.FollowUsersForm(instance=request.user)
+    if request.method == 'POST':
+        form = forms.FollowUsersForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    return render(request, 'iga/follow_users_form.html', context={'form': form})

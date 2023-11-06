@@ -48,10 +48,10 @@ urlpatterns = [
          name='upload_profile_photo'),
     path('iga/create', iga.views.blog_and_photo_upload, name='blog_create'),
     path('iga/<int:blog_id>', iga.views.view_blog, name='view_blog'),
-    path('iga/2/edit', iga.views.edit_blog, name='edit_blog'),
+    path('iga/<int:blog_id>/edit', iga.views.edit_blog, name='edit_blog'),
     path('photo/upload-multiple/', iga.views.create_multiple_photos,
     name='create_multiple_photos'),
-
+    path('follow-users/', iga.views.follow_users, name='follow_users')
 ]
 if settings.DEBUG:
     urlpatterns += static(
