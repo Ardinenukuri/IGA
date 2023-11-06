@@ -1,21 +1,15 @@
 {% extends 'base.html' %}
+{% load blog_extras %}
 {% block content %}
+    <h2>Your Feed</h2>
     <div class="grid-container">
-        {% for photo in photos %}
-            <div class="post">
-                <img src="{{ photo.image.url }}">
-                <p>{{ photo.caption }}</p>
-            </div>
+        {% for instance in page_obj %}
+            {% if instance|model_type == 'Blog' %}
+                {% include 'iga/partials/blog_snippet.html' with blog=instance %}
+            {% elif instance|model_type == 'Photo' %}
+                {% include 'iga/partials/photo_snippet.html' with photo=instance %}
+            {% endif %}
         {% endfor %}
     </div>
-
-        <div class="grid-container">
-            {% for blog in blogs %}
-                <div class="post">
-                    <a href="{% url 'view_blog' blog.id %}">
-                        <h4>Blog Post: {{ blog.title }}</h4>
-                        <img src="{{ blog.photo.image.url }}">
-                    </a>
-                </div>
-    {% endfor %}
+    {% include 'partials/page_navigator.html' %}
 {% endblock content %}
