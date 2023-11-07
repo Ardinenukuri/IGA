@@ -5,9 +5,9 @@
     <div class="grid-container">
         {% for instance in page_obj %}
             {% if instance|model_type == 'Blog' %}
-                {% include 'iga/partials/blog_snippet.html' with blog=instance %}
+                {% include 'blog/partials/blog_snippet.html' with blog=instance %}
             {% elif instance|model_type == 'Photo' %}
-                {% include 'iga/partials/photo_snippet.html' with photo=instance %}
+                {% include 'blog/partials/photo_snippet.html' with photo=instance %}
             {% endif %}
         {% endfor %}
     </div>

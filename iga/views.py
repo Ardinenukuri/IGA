@@ -6,7 +6,28 @@ from django.forms import formset_factory
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
+# appname/views.py
+
+from rest_framework import viewsets
+from iga.models import Photo, Blog, BlogContributor
+from iga.serializers import PhotoSerializer, BlogSerializer, BlogContributorSerializer
+
+
 from . import forms, models
+
+class PhotoViewSet(viewsets.ModelViewSet):
+    queryset = Photo.objects.all()
+    serializer_class = PhotoSerializer
+
+class BlogViewSet(viewsets.ModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+
+class BlogContributorViewSet(viewsets.ModelViewSet):
+    queryset = BlogContributor.objects.all()
+    serializer_class = BlogContributorSerializer
+
+
 
 
 @login_required

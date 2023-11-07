@@ -17,13 +17,22 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
 
 
 
 import authentification.views
 import iga.views
+
+
+from rest_framework.routers import DefaultRouter
+from iga.views import PhotoViewSet, BlogViewSet, BlogContributorViewSet
+
+router = DefaultRouter()
+router.register(r'photos', PhotoViewSet, basename='photo')
+router.register(r'blogs', BlogViewSet, basename='blog')
+router.register(r'blog-contributors', BlogContributorViewSet, basename='blogcontributor')
 
 
 urlpatterns = [
@@ -51,7 +60,9 @@ urlpatterns = [
     path('iga/<int:blog_id>/edit', iga.views.edit_blog, name='edit_blog'),
     path('photo/upload-multiple/', iga.views.create_multiple_photos,
     name='create_multiple_photos'),
-    path('follow-users/', iga.views.follow_users, name='follow_users')
+    path('follow-users/', iga.views.follow_users, name='follow_users'),
+    path('api-auth/', include('rest_framework.urls')),
+    path('api/', include('router.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(
