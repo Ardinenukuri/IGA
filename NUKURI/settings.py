@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -145,3 +146,10 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = LOGIN_URL
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /('media/')
+STATICFILES_DIRS = [
+    BASE_DIR / "iga/static",
+]
+STATICFILES_NAMESPACES = {
+    'iga' : 'iga/static',
+}
+STATIC_ROOT = os.path.join(BASE_DIR, '../staticfiles')

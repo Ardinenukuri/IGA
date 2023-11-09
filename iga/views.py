@@ -6,14 +6,34 @@ from django.forms import formset_factory
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
-# appname/views.py
 
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from iga.models import Photo, Blog, BlogContributor
 from iga.serializers import PhotoSerializer, BlogSerializer, BlogContributorSerializer
 
 
 from . import forms, models
+
+class PhotoAPIView(APIView):
+    def get(self, *args, **kwargs):
+        photos = Photo.objects.all()
+        serializer = PhotoSerializer(photos, many=True)
+        return Response(serializer.data)
+
+class BlogAPIView(APIView):
+    def get(self, *args, **kwargs):
+        blogs = Blog.objects.all()
+        serializer = BlogSerializer(blogs, many=True)
+        return Response(serializer.data)
+
+class BlogContributorAPIView(APIView):
+    def get(self, *args, **kwargs):
+        contributors = BlogContributor.objects.all()
+        serializer = BlogContributorSerializer(contributors, many=True)
+        return Response(serializer.data)
+    
 
 class PhotoViewSet(viewsets.ModelViewSet):
     queryset = Photo.objects.all()
@@ -31,7 +51,6 @@ class BlogContributorViewSet(viewsets.ModelViewSet):
 
 
 @login_required
-@permission_required('blog.add_photo')
 def photo_upload(request):
     form = forms.PhotoForm()
     if request.method == 'POST':
@@ -68,7 +87,6 @@ def home(request):
 
 
 @login_required
-@permission_required(['blog.add_photo', 'blog.add_blog'])
 def blog_and_photo_upload(request):
     blog_form = forms.BlogForm()
     photo_form = forms.PhotoForm()
@@ -98,7 +116,6 @@ def view_blog(request, blog_id):
 
 
 @login_required
-@permission_required('blog.change_blog')
 def edit_blog(request, blog_id):
     blog = get_object_or_404(models.Blog, id=blog_id)
     edit_form = forms.BlogForm(instance=blog)
@@ -122,7 +139,6 @@ def edit_blog(request, blog_id):
 
 
 @login_required
-@permission_required('blog.add_photo')
 def create_multiple_photos(request):
     PhotoFormSet = formset_factory(forms.PhotoForm, extra=5)
     formset = PhotoFormSet()
@@ -157,3 +173,15 @@ def photo_feed(request):
     page_obj = paginator.get_page(page_number)
     context = {'page_obj': page_obj}
     return render(request, 'iga/photo_feed.html', context=context)
+
+def index(request):
+    return render(request, 'iga/index.html')
+
+def about_us(request):
+    return render(request, 'iga/about-us.html')
+
+def contact_us(request):
+    return render(request, 'iga/contact_us.html')
+
+def privacy_and_policy(request):
+    return render(request, 'iga/privacy_and_policy.html')

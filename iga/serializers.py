@@ -4,14 +4,14 @@ from iga.models import Photo, Blog, BlogContributor
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
-        fields = '__all__'
+        fields = ['title', 'image', 'description', 'date_created', 'date_updated']
 
 class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog
-        fields = '__all__'
+        fields = ['title', 'content', 'author', 'date_created', 'date_updated']
 
 class BlogContributorSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogContributor
-        fields = '__all__'
+        fields = ['name', 'bio', 'email', 'website']

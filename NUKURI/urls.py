@@ -23,6 +23,7 @@ from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView,
 
 
 import authentification.views
+from iga.views import PhotoAPIView, BlogAPIView, BlogContributorAPIView
 import iga.views
 
 
@@ -30,9 +31,9 @@ from rest_framework.routers import DefaultRouter
 from iga.views import PhotoViewSet, BlogViewSet, BlogContributorViewSet
 
 router = DefaultRouter()
-router.register(r'photos', PhotoViewSet, basename='photo')
-router.register(r'blogs', BlogViewSet, basename='blog')
-router.register(r'blog-contributors', BlogContributorViewSet, basename='blogcontributor')
+router.register('photos', PhotoViewSet, basename='photo')
+router.register('blogs', BlogViewSet, basename='blog')
+router.register('blog-contributors', BlogContributorViewSet, basename='blogcontributor')
 
 
 urlpatterns = [
@@ -62,7 +63,13 @@ urlpatterns = [
     name='create_multiple_photos'),
     path('follow-users/', iga.views.follow_users, name='follow_users'),
     path('api-auth/', include('rest_framework.urls')),
-    path('api/', include('router.urls')),
+    path('api/', include(router.urls)),
+    path('api/photo/', PhotoAPIView.as_view(), name='photo_api'),
+    path('api/blog/', BlogAPIView.as_view(), name='blog_api'),
+    path('api/blogcontributor/', BlogContributorAPIView.as_view(), name='blog_contributor_api'),
+    path('iga/', include('iga.urls')),
+
+
 ]
 if settings.DEBUG:
     urlpatterns += static(
