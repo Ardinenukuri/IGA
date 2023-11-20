@@ -1,0 +1,13 @@
+{% block content %}
+<h2>Leave Application Approval</h2>
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+<p>Leave Details:</p>
+<p>Start Date: {{ leave_application.start_date }}</p>
+<p>End Date: {{ leave_application.end_date }}</p>
+<p>Requested By: {{ leave_application.requested_by.username }}</p>
+<p>Reason: {{ leave_application.reason }}</p>
+{% endblock content %}

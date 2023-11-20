@@ -1,0 +1,9 @@
+{% block content %}
+<h2>My Leave Applications</h2>
+<ul>
+    {% for leave_application in leave_applications %}
+        <li>{{ leave_application.start_date }} to {{ leave_application.end_date }} - Status: {{ leave_application.status }}</li>
+    {% endfor %}
+</ul>
+{% endblock content %}
+

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from PIL import Image
+from django.utils.translation import gettext_lazy as _
 
 
 class Photo(models.Model):
@@ -33,6 +34,14 @@ class Blog(models.Model):
     content = models.TextField()
     word_count = models.IntegerField(null=True)
     contributors = models.ManyToManyField(settings.AUTH_USER_MODEL, through='BlogContributor', related_name='contributed_blogs')
+    language = models.CharField(
+         max_length=10,
+         choices=[
+              ('en', _('English')),
+              ('fr', _('French')),
+              ('ki', _('kirundi')),
+         ])
+    default='en',
 
 
     def _get_word_count(self):

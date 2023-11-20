@@ -6,6 +6,7 @@ class PhotoSerializer(serializers.ModelSerializer):
         model = Photo
         fields = ['title', 'image', 'description', 'date_created', 'date_updated']
 
+
 class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog

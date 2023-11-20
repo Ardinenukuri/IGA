@@ -18,17 +18,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
-
-
+from django.contrib.auth.views import (
+    LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
+)
 
 import authentification.views
-from iga.views import PhotoAPIView, BlogAPIView, BlogContributorAPIView
-import iga.views
-
+from iga.views import (
+    PhotoAPIView, BlogAPIView, BlogContributorAPIView,
+    FollowUsersView, ViewBlogView, EditBlogView,
+    PhotoUploadView, CreateMultiplePhotosView, HomeView, BlogAndPhotoUploadView
+)
 
 from rest_framework.routers import DefaultRouter
 from iga.views import PhotoViewSet, BlogViewSet, BlogContributorViewSet
+
 
 router = DefaultRouter()
 router.register('photos', PhotoViewSet, basename='photo')
@@ -51,23 +54,23 @@ urlpatterns = [
         template_name='authentication/password_change_done.html'),
          name='password_change_done'
          ),
-    path('home/', iga.views.home, name='home'),
+    path('home/', HomeView.as_view(), name='home'),
     path('signup/', authentification.views.signup_page, name='signup'),
-    path('photo/upload/', iga.views.photo_upload, name='photo_upload'),
+    path('photo/upload/', PhotoUploadView.as_view(), name='photo_upload'),
     path('profile-photo/upload', authentification.views.upload_profile_photo,
          name='upload_profile_photo'),
-    path('iga/create', iga.views.blog_and_photo_upload, name='blog_create'),
-    path('iga/<int:blog_id>', iga.views.view_blog, name='view_blog'),
-    path('iga/<int:blog_id>/edit', iga.views.edit_blog, name='edit_blog'),
-    path('photo/upload-multiple/', iga.views.create_multiple_photos,
-    name='create_multiple_photos'),
-    path('follow-users/', iga.views.follow_users, name='follow_users'),
+    path('iga/create', BlogAndPhotoUploadView.as_view(), name='blog_create'),
+    path('iga/<int:blog_id>', ViewBlogView.as_view, name='view_blog'),
+    path('iga/<int:blog_id>/edit', EditBlogView.as_view(), name='edit_blog'),
+    path('photo/upload-multiple/', CreateMultiplePhotosView.as_view(), name='create_multiple_photos'),
+    path('follow-users/', FollowUsersView.as_view(), name='follow_users'),
     path('api-auth/', include('rest_framework.urls')),
     path('api/', include(router.urls)),
     path('api/photo/', PhotoAPIView.as_view(), name='photo_api'),
     path('api/blog/', BlogAPIView.as_view(), name='blog_api'),
     path('api/blogcontributor/', BlogContributorAPIView.as_view(), name='blog_contributor_api'),
     path('iga/', include('iga.urls')),
+    path('leave/', include('leave.urls'),)
 
 
 ]

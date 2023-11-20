@@ -12,6 +12,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from iga.models import Photo, Blog, BlogContributor
 from iga.serializers import PhotoSerializer, BlogSerializer, BlogContributorSerializer
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from iga.forms import PhotoForm, BlogForm, DeleteBlogForm, FollowUsersForm
 
 
 from . import forms, models
@@ -35,64 +39,93 @@ class BlogContributorAPIView(APIView):
         return Response(serializer.data)
     
 
-class PhotoViewSet(viewsets.ModelViewSet):
-    queryset = Photo.objects.all()
+class PhotoViewSet(ReadOnlyModelViewSet):
+    
     serializer_class = PhotoSerializer
 
-class BlogViewSet(viewsets.ModelViewSet):
-    queryset = Blog.objects.all()
+    def get_queryset(self):
+        return models.Photo.objects.filter(active=True)
+
+class BlogViewSet(ReadOnlyModelViewSet):
+    
     serializer_class = BlogSerializer
 
-class BlogContributorViewSet(viewsets.ModelViewSet):
-    queryset = BlogContributor.objects.all()
+    def get_queryset(self):
+        queryset = Blog.objects.filter(active=True)
+        photo_id = self.request.GET.get('photo_id')
+        if photo_id is not None:
+            queryset = queryset. filter(photo_id=photo_id)
+            return queryset
+
+class BlogContributorViewSet(ReadOnlyModelViewSet):
+    
     serializer_class = BlogContributorSerializer
 
+    def get_queryset(self):
+        return BlogContributor.objects.filter(active=True)
 
 
 
-@login_required
-def photo_upload(request):
-    form = forms.PhotoForm()
-    if request.method == 'POST':
-        form = forms.PhotoForm(request.POST, request.FILES)
+
+class PhotoUploadView(LoginRequiredMixin, View):
+    template_name = 'iga/photo_upload.html'
+
+    def get(self, request, *args, **kwargs):
+        form = PhotoForm()
+        return render(request, self.template_name, context={'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = PhotoForm(request.POST, request.FILES)
         if form.is_valid():
             photo = form.save(commit=False)
-            # set the uploader to the user before saving the model
             photo.uploader = request.user
-            # now we can save
             photo.save()
             return redirect('home')
-    return render(request, 'iga/photo_upload.html', context={'form': form})
+        return render(request, self.template_name, context={'form': form})
+    
+class HomeView(LoginRequiredMixin, View):
+    template_name = 'iga/home.html'
+    paginate_by = 6
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return render(request, 'iga/index.html')  # Redirect or handle unauthenticated users as needed
+
+        blogs = Blog.objects.filter(
+            Q(contributors__in=request.user.follows.all()) | Q(starred=True))
+        photos = Photo.objects.filter(
+            uploader__in=request.user.follows.all()).exclude(
+            blog__in=blogs)
+
+        blogs_and_photos = sorted(
+            chain(blogs, photos),
+            key=lambda instance: instance.date_created,
+            reverse=True
+        )
+        paginator = Paginator(blogs_and_photos, self.paginate_by)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {'page_obj': page_obj}
+
+        return render(request, self.template_name, context=context)
 
 
-@login_required
-def home(request):
-    blogs = models.Blog.objects.filter(
-        Q(contributors__in=request.user.follows.all()) | Q(starred=True))
-    photos = models.Photo.objects.filter(
-        uploader__in=request.user.follows.all()).exclude(
-        blog__in=blogs)
+   
+class BlogAndPhotoUploadView(LoginRequiredMixin, View):
+    template_name = 'iga/create_blog_post.html'
 
-    blogs_and_photos = sorted(
-        chain(blogs, photos),
-        key=lambda instance: instance.date_created,
-        reverse=True
-    )
-    paginator = Paginator(blogs_and_photos, 6)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {'page_obj': page_obj}
+    def get(self, request, *args, **kwargs):
+        blog_form = BlogForm()
+        photo_form = PhotoForm()
+        context = {
+            'blog_form': blog_form,
+            'photo_form': photo_form,
+        }
+        return render(request, self.template_name, context=context)
 
-    return render(request, 'iga/home.html', context=context)
-
-
-@login_required
-def blog_and_photo_upload(request):
-    blog_form = forms.BlogForm()
-    photo_form = forms.PhotoForm()
-    if request.method == 'POST':
-        blog_form = forms.BlogForm(request.POST)
-        photo_form = forms.PhotoForm(request.POST, request.FILES)
+    def post(self, request, *args, **kwargs):
+        blog_form = BlogForm(request.POST)
+        photo_form = PhotoForm(request.POST, request.FILES)
         if all([blog_form.is_valid(), photo_form.is_valid()]):
             photo = photo_form.save(commit=False)
             photo.uploader = request.user
@@ -102,48 +135,66 @@ def blog_and_photo_upload(request):
             blog.save()
             blog.contributors.add(request.user, through_defaults={'contribution': 'Primary Author'})
             return redirect('home')
-    context = {
-        'blog_form': blog_form,
-        'photo_form': photo_form,
-    }
-    return render(request, 'iga/create_blog_post.html', context=context)
+        context = {
+            'blog_form': blog_form,
+            'photo_form': photo_form,
+        }
+        return render(request, self.template_name, context=context)
 
 
-@login_required
-def view_blog(request, blog_id):
-    blog = get_object_or_404(models.Blog, id=blog_id)
-    return render(request, 'iga/view_blog.html', {'blog': blog})
 
 
-@login_required
-def edit_blog(request, blog_id):
-    blog = get_object_or_404(models.Blog, id=blog_id)
-    edit_form = forms.BlogForm(instance=blog)
-    delete_form = forms.DeleteBlogForm()
-    if request.method == 'POST':
+class ViewBlogView(LoginRequiredMixin, View):
+    template_name = 'iga/view_blog.html'
+
+    def get(self, request, blog_id, *args, **kwargs):
+        blog = get_object_or_404(Blog, id=blog_id)
+        return render(request, self.template_name, {'blog': blog})
+
+
+class EditBlogView(LoginRequiredMixin, View):
+    template_name = 'iga/edit_blog.html'
+
+    def get(self, request, blog_id, *args, **kwargs):
+        blog = get_object_or_404(Blog, id=blog_id)
+        edit_form = BlogForm(instance=blog)
+        delete_form = DeleteBlogForm()
+        context = {
+            'edit_form': edit_form,
+            'delete_form': delete_form,
+        }
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, blog_id, *args, **kwargs):
+        blog = get_object_or_404(Blog, id=blog_id)
+        edit_form = BlogForm(request.POST, instance=blog)
+        delete_form = DeleteBlogForm(request.POST)
         if 'edit_blog' in request.POST:
-            edit_form = forms.BlogForm(request.POST, instance=blog)
             if edit_form.is_valid():
                 edit_form.save()
                 return redirect('home')
-        if 'delete_blog' in request.POST:
-            delete_form = forms.DeleteBlogForm(request.POST)
+        elif 'delete_blog' in request.POST:
             if delete_form.is_valid():
                 blog.delete()
                 return redirect('home')
-    context = {
-        'edit_form': edit_form,
-        'delete_form': delete_form,
-    }
-    return render(request, 'iga/edit_blog.html', context=context)
 
+        context = {
+            'edit_form': edit_form,
+            'delete_form': delete_form,
+        }
+        return render(request, self.template_name, context=context)
 
-@login_required
-def create_multiple_photos(request):
-    PhotoFormSet = formset_factory(forms.PhotoForm, extra=5)
-    formset = PhotoFormSet()
-    if request.method == 'POST':
-        formset = PhotoFormSet(request.POST, request.FILES)
+class CreateMultiplePhotosView(LoginRequiredMixin, View):
+    template_name = 'iga/create_multiple_photos.html'
+    formset_class = formset_factory(PhotoForm, extra=5)
+
+    def get(self, request, *args, **kwargs):
+        formset = self.formset_class()
+        context = {'formset': formset}
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, *args, **kwargs):
+        formset = self.formset_class(request.POST, request.FILES)
         if formset.is_valid():
             for form in formset:
                 if form.cleaned_data:
@@ -151,20 +202,25 @@ def create_multiple_photos(request):
                     photo.uploader = request.user
                     photo.save()
             return redirect('home')
-    return render(request, 'iga/create_multiple_photos.html', {'formset': formset})
+        context = {'formset': formset}
+        return render(request, self.template_name, context=context)
+    
+class FollowUsersView(LoginRequiredMixin, View):
+    template_name = 'iga/follow_users_form.html'
 
+    def get(self, request, *args, **kwargs):
+        form = FollowUsersForm(instance=request.user)
+        context = {'form': form}
+        return render(request, self.template_name, context=context)
 
-@login_required
-def follow_users(request):
-    form = forms.FollowUsersForm(instance=request.user)
-    if request.method == 'POST':
-        form = forms.FollowUsersForm(request.POST, instance=request.user)
+    def post(self, request, *args, **kwargs):
+        form = FollowUsersForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             return redirect('home')
-    return render(request, 'iga/follow_users_form.html', context={'form': form})
-
-
+        context = {'form': form}
+        return render(request, self.template_name, context=context)
+    
 def photo_feed(request):
     photos = models.Photo.objects.filter(
         uploader__in=request.user.follows.all()).order_by('-date_created')

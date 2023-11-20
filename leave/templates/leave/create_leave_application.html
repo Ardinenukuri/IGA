@@ -1,0 +1,14 @@
+{% block content %}
+<h2>Create Leave Application</h2>
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+<h3>Request Leave</h3>
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+{% endblock content %}

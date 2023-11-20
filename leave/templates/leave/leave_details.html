@@ -1,0 +1,12 @@
+{% block content %}
+<h2>Leave Details</h2>
+<p>Start Date: {{ leave_application.start_date }}</p>
+<p>End Date: {{ leave_application.end_date }}</p>
+<p>Requested By: {{ leave_application.requested_by.username }}</p>
+<p>Status: {{ leave_application.status }}</p>
+{% if leave_application.processed_by %}
+    <p>Processed By: {{ leave_application.processed_by.username }}</p>
+{% endif %}
+<p>Reason: {{ leave_application.reason }}</p>
+{% endblock content %}
+
