@@ -7,46 +7,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title style="font-family: Arial, sans-serif;">My Frontend</title>
+    <title>My Frontend</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'js/script.js' %}">
-    <link rel="stylesheet" href="{% static 'img/example.jpg' %}">
-    <link rel="stylesheet" href="{% static 'fonts/icon.svg' %}">
 </head>
 
-<body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+<body>
 
-    <header style="background-color: #007BFF; color: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <header>
+        <div id="top-left-buttons">
+            <a href="{% url 'signup' %}" id="signup-btn">Sign Up</a>
+            <span id="slash">/</span>
+            <a href="{% url 'login' %}" id="signin-btn">Sign in</a>
+        </div>
         <div class="header-content">
-            <h1 style="font-size: 2em;">Welcome to IGA</h1>
             <nav>
-                <ul style="list-style: none; padding: 0; display: flex;">
-                    <li style="margin-right: 20px;"><a href="{% url 'home' %}" style="text-decoration: none; color: #fff; font-weight: bold; font-size: 1.2em;" class="nav-link">Home</a></li>
-                    <li style="margin-right: 20px;"><a href="{% url 'about_us' %}" style="text-decoration: none; color: #fff; font-weight: bold; font-size: 1.2em;" class="nav-link">About Us</a></li>
-                    <li style="margin-right: 20px;"><a href="{% url 'contact_us' %}" style="text-decoration: none; color: #fff; font-weight: bold; font-size: 1.2em;" class="nav-link">Contact Us</a></li>
-                    <li style="margin-right: 20px;"><a href="{% url 'privacy_and_policy' %}" style="text-decoration: none; color: #fff; font-weight: bold; font-size: 1.2em;" class="nav-link"> Privacy and Policy</a></li>
+                <ul>
+                    <li><a href="{% url 'home' %}" class="nav-link">Home</a></li>
+                    <li><a href="{% url 'about_us' %}" class="nav-link">About Us</a></li>
+                    <li><a href="{% url 'contact_us' %}" class="nav-link">Contact Us</a></li>
+                    <li><a href="{% url 'privacy_and_policy' %}" class="nav-link">Privacy and Policy</a></li>
                 </ul>
             </nav>
-            <form action="#" method="post" style="margin-right: 20px;" class="form-search">
-                <input type="search" name="q" id="search-input" placeholder="Search..." aria-label="Search through site content" style="padding: 8px; border: none; border-radius: 4px;" />
-                <button class="search-button" style="background-color: #fff; border: none; border-radius: 4px; margin-left: -38px;">
-                  <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="search-icon">
-                    <title>Search icon</title>
-                    <path
-                      d="M508.5 468.9L387.1 347.5c-2.3-2.3-5.3-3.5-8.5-3.5h-13.2c31.5-36.5 50.6-84 50.6-136C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c52 0 99.5-19.1 136-50.6v13.2c0 3.2 1.3 6.2 3.5 8.5l121.4 121.4c4.7 4.7 12.3 4.7 17 0l22.6-22.6c4.7-4.7 4.7-12.3 0-17zM208 368c-88.4 0-160-71.6-160-160S119.6 48 208 48s160 71.6 160 160-71.6 160-160 160z"></path>
+            <form action="#" method="post" class="form-search">
+                <input type="search" name="q" id="search-input" placeholder="Search..." aria-label="Search through site content" />
+                <button class="search-button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <path d="M21.5 20.9l-5.2-5.2c1.4-1.8 2.2-4 2.2-6.3C18.5 5.2 14.3 1 9.5 1S.5 5.2.5 10s4.2 9 9 9c2.1 0 4-0.7 5.5-2.2l5.2 5.2c0.4 0.4 1 0.4 1.4 0s0.4-1 0-1.4zM9.5 18C5.9 18 3 15.1 3 11.5S5.9 5 9.5 5 16 7.9 16 11.5 13.1 18 9.5 18z"/>
                   </svg>
-                </button>
+              </button>
+              
             </form>
-        </div><br>
-        
+        </div>
     </header>
-
-    <main><img src="{% static 'img/women_in-education.png' %}" alt="Women in Education" style="max-width: 100%; height: auto;"></main>
+    <div class="main-content">
+      <main>
+      <p><strong>Welcome to IGA</strong></p> 
+      <img src="{% static 'img/women_in-education.png' %}" alt="Women in Education">
+      <h1>“Education is the passport to the future, for tomorrow belongs to those who prepare for it today.” – Malcolm X</h1> 
     
-    <p style="text-decoration: none; color: #fff; font-weight: bold; font-size: 1.2em;">IGA is a website that aims to leverage technology to provide quality and accessible education to women, thus bridging the gender gap in education.</p>
+      </main>
+  </div>
 
-    <p style="text-decoration: none; color: #fff; font-weight: bold; font-size: 1.2em;">The meaning of IGA in English is "STUDY or LEARN". It is a Kirundi word and the name of this website that lets users share blogs or photos related to education. Only educational content is allowed on this website. We want users who post on this website to tell us how online education has helped them or not. We also want them to include links to the courses they have taken on their blogs and to show us photos of their transformation after taking these courses (before and after). This is to inspire young people who visit this website, especially girls and Women who have lost hope.</p>
 
+  
 </body>
 
 </html>

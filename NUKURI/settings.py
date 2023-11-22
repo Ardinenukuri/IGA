@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'NUKURI.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':'NUKURI',
+        'NAME':'IGAd',
         'USER': 'postgres',
         'PASSWORD': 'nukuri',
         'HOST': 'localhost',

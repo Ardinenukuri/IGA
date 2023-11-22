@@ -3,6 +3,19 @@
 {% block content %}
     <h2>Your Feed</h2>
     <div class="grid-container">
+        {% for blog in blogs %}
+            <div class="grid-item">
+                <a href="{{ blog.get_absolute_url }}">
+                    <img src="{{ blog.image.url }}" alt="{{ blog.title }}">
+                    <h3>{{ blog.title }}</h3>
+                    <p>{{ blog.content }}</p>
+                    <p>{{blog.contributors}}</p> 
+                </a>
+            </div>
+        {% endfor %}
+
+
+
         {% for instance in page_obj %}
             {% if instance|model_type == 'Blog' %}
                 {% include 'blog/partials/blog_snippet.html' with blog=instance %}

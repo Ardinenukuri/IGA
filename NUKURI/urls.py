@@ -41,7 +41,7 @@ router.register('blog-contributors', BlogContributorViewSet, basename='blogcontr
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-   path('', LoginView.as_view(
+   path('home', LoginView.as_view(
            template_name='authentication/login.html',
            redirect_authenticated_user=True),
         name='login'),
@@ -70,7 +70,12 @@ urlpatterns = [
     path('api/blog/', BlogAPIView.as_view(), name='blog_api'),
     path('api/blogcontributor/', BlogContributorAPIView.as_view(), name='blog_contributor_api'),
     path('iga/', include('iga.urls')),
-    path('leave/', include('leave.urls'),)
+    path('leave/', include('leave.urls')),
+    path('', authentification.views.index, name='index'),
+  
+    
+
+   
 
 
 ]

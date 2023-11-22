@@ -2,7 +2,12 @@ from django.conf import settings
 from django.db import models
 from PIL import Image
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
+class Post(models.Model):
+    title= models.CharField(max_length=200)
+    content= models.CharField()
+    pub_date = models.DateTimeField('date published')
 
 class Photo(models.Model):
     IMAGE_MAX_SIZE = (800, 800)
@@ -35,14 +40,15 @@ class Blog(models.Model):
     word_count = models.IntegerField(null=True)
     contributors = models.ManyToManyField(settings.AUTH_USER_MODEL, through='BlogContributor', related_name='contributed_blogs')
     language = models.CharField(
-         max_length=10,
+         max_length=50,
          choices=[
               ('en', _('English')),
               ('fr', _('French')),
               ('ki', _('kirundi')),
-         ])
-    default='en',
-
+         ],
+        default='English')
+    created_at = models.DateTimeField(default=timezone.now)
+    
 
     def _get_word_count(self):
         return len(self.content.split(' '))

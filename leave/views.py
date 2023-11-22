@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from leave.models import LeaveApplication
 from leave.forms import LeaveApplicationForm, LeaveApprovalForm
+from django.shortcuts import get_object_or_404
 
 # Explicitly add the default manager to the LeaveApplication model
 LeaveApplication.objects = models.Manager()
@@ -60,16 +61,17 @@ def leave_approval(request, leave_id):
     If the form is valid, updates the leave application status and redirects to the leave list.
     If the request method is GET, renders the leave approval form.
     """
-    leave_application = LeaveApplication.objects.get(pk=leave_id)
+    leave_application = get_object_or_404(LeaveApplication, pk=leave_id)
+
     if request.method == 'POST':
         form = LeaveApprovalForm(request.POST, instance=leave_application)
         if form.is_valid():
-            leave_application = form.save(commit=False)
-            leave_application.processed_by = request.user
-            leave_application.save()
+            # Save the form directly to update the instance
+            form.save()
             return redirect('leave:leave_list')
     else:
         form = LeaveApprovalForm(instance=leave_application)
+
     return render(
         request,
         'leave/leave_approval.html',

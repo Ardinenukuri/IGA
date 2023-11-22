@@ -6,9 +6,11 @@ This module defines the LeaveApplication model for managing leave-related inform
 
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 
 
 class LeaveApplication(models.Model):
+    
     """
     Model for Leave Applications.
 
@@ -36,6 +38,7 @@ class LeaveApplication(models.Model):
         blank=True,
         related_name='processed_leaves'
     )
+    
     
     reason = models.TextField()
 

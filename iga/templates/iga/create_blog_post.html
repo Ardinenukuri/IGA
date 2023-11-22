@@ -1,3 +1,4 @@
+{% extends 'base.html' %}
 {% block content %}
     <h2>Create a Post</h2>
     <form method="post" enctype="multipart/form-data">
@@ -6,4 +7,7 @@
         {% csrf_token %}
         <button type="submit" >Submit</button>
     </form>
+    {% for photo in blog.photos.all %}
+    <img src="{{ photo.image.url }}" alt="Photo">
+{% endfor %}
 {% endblock content %}

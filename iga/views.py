@@ -1,10 +1,14 @@
 from itertools import chain
 
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.paginator import Paginator
 from django.forms import formset_factory
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from .models import Blog
+
+
 
 
 from rest_framework import viewsets
@@ -18,7 +22,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from iga.forms import PhotoForm, BlogForm, DeleteBlogForm, FollowUsersForm
 
 
+
+
 from . import forms, models
+
 
 class PhotoAPIView(APIView):
     def get(self, *args, **kwargs):
@@ -26,29 +33,35 @@ class PhotoAPIView(APIView):
         serializer = PhotoSerializer(photos, many=True)
         return Response(serializer.data)
 
+
 class BlogAPIView(APIView):
     def get(self, *args, **kwargs):
         blogs = Blog.objects.all()
         serializer = BlogSerializer(blogs, many=True)
         return Response(serializer.data)
 
+
 class BlogContributorAPIView(APIView):
     def get(self, *args, **kwargs):
         contributors = BlogContributor.objects.all()
         serializer = BlogContributorSerializer(contributors, many=True)
         return Response(serializer.data)
-    
+   
+
 
 class PhotoViewSet(ReadOnlyModelViewSet):
-    
+   
     serializer_class = PhotoSerializer
+
 
     def get_queryset(self):
         return models.Photo.objects.filter(active=True)
 
+
 class BlogViewSet(ReadOnlyModelViewSet):
-    
+   
     serializer_class = BlogSerializer
+
 
     def get_queryset(self):
         queryset = Blog.objects.filter(active=True)
@@ -57,9 +70,11 @@ class BlogViewSet(ReadOnlyModelViewSet):
             queryset = queryset. filter(photo_id=photo_id)
             return queryset
 
+
 class BlogContributorViewSet(ReadOnlyModelViewSet):
-    
+   
     serializer_class = BlogContributorSerializer
+
 
     def get_queryset(self):
         return BlogContributor.objects.filter(active=True)
@@ -67,12 +82,18 @@ class BlogContributorViewSet(ReadOnlyModelViewSet):
 
 
 
+
+
+
+
 class PhotoUploadView(LoginRequiredMixin, View):
     template_name = 'iga/photo_upload.html'
+
 
     def get(self, request, *args, **kwargs):
         form = PhotoForm()
         return render(request, self.template_name, context={'form': form})
+
 
     def post(self, request, *args, **kwargs):
         form = PhotoForm(request.POST, request.FILES)
@@ -82,20 +103,29 @@ class PhotoUploadView(LoginRequiredMixin, View):
             photo.save()
             return redirect('home')
         return render(request, self.template_name, context={'form': form})
-    
+   
 class HomeView(LoginRequiredMixin, View):
     template_name = 'iga/home.html'
     paginate_by = 6
-
+    context_object_name = 'blog_posts'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['blog_posts'] = Blog.objects.all()  # Adjust this based on your model
+        return context
+    
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return render(request, 'iga/index.html')  # Redirect or handle unauthenticated users as needed
+
 
         blogs = Blog.objects.filter(
             Q(contributors__in=request.user.follows.all()) | Q(starred=True))
         photos = Photo.objects.filter(
             uploader__in=request.user.follows.all()).exclude(
-            blog__in=blogs)
+            blog__in=blogs,
+            )
+
 
         blogs_and_photos = sorted(
             chain(blogs, photos),
@@ -105,14 +135,19 @@ class HomeView(LoginRequiredMixin, View):
         paginator = Paginator(blogs_and_photos, self.paginate_by)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        context = {'page_obj': page_obj}
+        context = {'page_obj': page_obj, 'blogs': blogs}
+        print("Blogs and Photos:", blogs_and_photos)
+
 
         return render(request, self.template_name, context=context)
+
+
 
 
    
 class BlogAndPhotoUploadView(LoginRequiredMixin, View):
     template_name = 'iga/create_blog_post.html'
+
 
     def get(self, request, *args, **kwargs):
         blog_form = BlogForm()
@@ -122,6 +157,7 @@ class BlogAndPhotoUploadView(LoginRequiredMixin, View):
             'photo_form': photo_form,
         }
         return render(request, self.template_name, context=context)
+
 
     def post(self, request, *args, **kwargs):
         blog_form = BlogForm(request.POST)
@@ -144,16 +180,23 @@ class BlogAndPhotoUploadView(LoginRequiredMixin, View):
 
 
 
+
+
+
 class ViewBlogView(LoginRequiredMixin, View):
     template_name = 'iga/view_blog.html'
+
 
     def get(self, request, blog_id, *args, **kwargs):
         blog = get_object_or_404(Blog, id=blog_id)
         return render(request, self.template_name, {'blog': blog})
 
 
+
+
 class EditBlogView(LoginRequiredMixin, View):
     template_name = 'iga/edit_blog.html'
+
 
     def get(self, request, blog_id, *args, **kwargs):
         blog = get_object_or_404(Blog, id=blog_id)
@@ -164,6 +207,7 @@ class EditBlogView(LoginRequiredMixin, View):
             'delete_form': delete_form,
         }
         return render(request, self.template_name, context=context)
+
 
     def post(self, request, blog_id, *args, **kwargs):
         blog = get_object_or_404(Blog, id=blog_id)
@@ -178,20 +222,24 @@ class EditBlogView(LoginRequiredMixin, View):
                 blog.delete()
                 return redirect('home')
 
+
         context = {
             'edit_form': edit_form,
             'delete_form': delete_form,
         }
         return render(request, self.template_name, context=context)
 
+
 class CreateMultiplePhotosView(LoginRequiredMixin, View):
     template_name = 'iga/create_multiple_photos.html'
     formset_class = formset_factory(PhotoForm, extra=5)
+
 
     def get(self, request, *args, **kwargs):
         formset = self.formset_class()
         context = {'formset': formset}
         return render(request, self.template_name, context=context)
+
 
     def post(self, request, *args, **kwargs):
         formset = self.formset_class(request.POST, request.FILES)
@@ -204,14 +252,16 @@ class CreateMultiplePhotosView(LoginRequiredMixin, View):
             return redirect('home')
         context = {'formset': formset}
         return render(request, self.template_name, context=context)
-    
+   
 class FollowUsersView(LoginRequiredMixin, View):
     template_name = 'iga/follow_users_form.html'
+
 
     def get(self, request, *args, **kwargs):
         form = FollowUsersForm(instance=request.user)
         context = {'form': form}
         return render(request, self.template_name, context=context)
+
 
     def post(self, request, *args, **kwargs):
         form = FollowUsersForm(request.POST, instance=request.user)
@@ -220,7 +270,7 @@ class FollowUsersView(LoginRequiredMixin, View):
             return redirect('home')
         context = {'form': form}
         return render(request, self.template_name, context=context)
-    
+   
 def photo_feed(request):
     photos = models.Photo.objects.filter(
         uploader__in=request.user.follows.all()).order_by('-date_created')
@@ -230,14 +280,29 @@ def photo_feed(request):
     context = {'page_obj': page_obj}
     return render(request, 'iga/photo_feed.html', context=context)
 
+
 def index(request):
-    return render(request, 'iga/index.html')
+    blogs= Blog.objects.all()
+    context= {
+        'blogs':blogs
+    }
+    return render(request, 'iga/index.html', context)
+
 
 def about_us(request):
     return render(request, 'iga/about-us.html')
 
+
 def contact_us(request):
     return render(request, 'iga/contact_us.html')
 
+
 def privacy_and_policy(request):
     return render(request, 'iga/privacy_and_policy.html')
+
+
+
+   
+
+
+

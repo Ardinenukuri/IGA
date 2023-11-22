@@ -1,9 +1,3 @@
-"""
-leave/context_processors.py - Context processors for leave-related functionality.
-
-This module defines context processors, including one for retrieving upcoming leaves.
-"""
-
 from django.utils import timezone
 from .models import LeaveApplication
 
@@ -19,10 +13,15 @@ def upcoming_leaves(request):
 
     user = request.user
     if user.is_authenticated:
-        one_week_from_now = timezone.now() + timezone.timedelta(days=7)
-        upcoming_leaves = LeaveApplication.objects.filter(
-            # requested_by=user,
-            # start_date__gt=timezone.now().date(),
-            # start_date__lte=one_week_from_now.date()
-        )
+        try:
+            one_week_from_now = timezone.now() + timezone.timedelta(days=7)
+            upcoming_leaves = LeaveApplication.objects.filter(
+                   requested_by=user,
+                   start_date__gt=timezone.now().date(),
+                   start_date__lte=one_week_from_now.date()
+            )
+        except Exception as e:
+            # Handle the exception (e.g., log it)
+            print(f"Error retrieving upcoming leaves: {e}")
+
     return {'upcoming_leaves': upcoming_leaves}
