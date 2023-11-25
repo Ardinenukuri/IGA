@@ -19,7 +19,7 @@ from iga.serializers import PhotoSerializer, BlogSerializer, BlogContributorSeri
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from iga.forms import PhotoForm, BlogForm, DeleteBlogForm, FollowUsersForm
+from iga.forms import PhotoForm, BlogForm, DeleteBlogForm, FollowUsersForm, DeletePhotoForm
 
 
 
@@ -108,24 +108,22 @@ class HomeView(LoginRequiredMixin, View):
     template_name = 'iga/home.html'
     paginate_by = 6
     context_object_name = 'blog_posts'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['blog_posts'] = Blog.objects.all()  # Adjust this based on your model
-        return context
-    
+
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return render(request, 'iga/index.html')  # Redirect or handle unauthenticated users as needed
 
 
         blogs = Blog.objects.filter(
-            Q(contributors__in=request.user.follows.all()) | Q(starred=True))
+           Q(contributors__in=[request.user]) | Q(contributors__in=request.user.follows.all()) | Q(starred=True))
         photos = Photo.objects.filter(
-            uploader__in=request.user.follows.all()).exclude(
+            uploader__in=[request.user]).exclude(
             blog__in=blogs,
             )
 
+        
+
+        
 
         blogs_and_photos = sorted(
             chain(blogs, photos),
@@ -171,11 +169,12 @@ class BlogAndPhotoUploadView(LoginRequiredMixin, View):
             blog.save()
             blog.contributors.add(request.user, through_defaults={'contribution': 'Primary Author'})
             return redirect('home')
-        context = {
-            'blog_form': blog_form,
-            'photo_form': photo_form,
-        }
-        return render(request, self.template_name, context=context)
+        else:
+            context = {
+                'blog_form': blog_form,
+                'photo_form': photo_form,
+            }
+            return render(request, self.template_name, context=context)
 
 
 
@@ -229,6 +228,44 @@ class EditBlogView(LoginRequiredMixin, View):
         }
         return render(request, self.template_name, context=context)
 
+class EditPhotoView(LoginRequiredMixin, View):
+    template_name = 'iga/edit_photo.html'
+
+    def get(self, request, photo_id, *args, **kwargs):
+        photo = get_object_or_404(Photo, id=photo_id)
+        edit_form = PhotoForm(instance=photo)
+        delete_form = DeletePhotoForm()
+
+        context = {
+            'photo': photo,
+            'edit_form': edit_form,
+            'delete_form': delete_form,
+        }
+
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, photo_id, *args, **kwargs):
+        photo = get_object_or_404(Photo, id=photo_id)
+        edit_form = PhotoForm(request.POST, instance=photo)
+        delete_form = DeletePhotoForm(request.POST)
+
+        if 'edit_photo' in request.POST:
+            if edit_form.is_valid():
+                edit_form.save()
+                return redirect('home')
+        elif 'delete_photo' in request.POST:
+            if delete_form.is_valid():
+                photo.delete()
+                return redirect('home')
+
+        context = {
+            'photo': photo,
+            'edit_form': edit_form,
+            'delete_form': delete_form,
+        }
+
+        return render(request, self.template_name, context=context)
+    
 
 class CreateMultiplePhotosView(LoginRequiredMixin, View):
     template_name = 'iga/create_multiple_photos.html'
@@ -299,6 +336,8 @@ def contact_us(request):
 
 def privacy_and_policy(request):
     return render(request, 'iga/privacy_and_policy.html')
+    
+
 
 
 

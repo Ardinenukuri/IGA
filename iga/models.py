@@ -35,10 +35,8 @@ class Blog(models.Model):
     content = models.CharField(max_length=5000)
     date_created = models.DateTimeField(auto_now_add=True)
     starred = models.BooleanField(default=False)
-    title = models.CharField(max_length=255)
-    content = models.TextField()
-    word_count = models.IntegerField(null=True)
     contributors = models.ManyToManyField(settings.AUTH_USER_MODEL, through='BlogContributor', related_name='contributed_blogs')
+    
     language = models.CharField(
          max_length=50,
          choices=[

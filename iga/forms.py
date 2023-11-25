@@ -14,6 +14,8 @@ class BlogForm(forms.ModelForm):
 class DeleteBlogForm(forms.Form):
     delete_blog = forms.BooleanField(widget=forms.HiddenInput, initial=True)
 
+class DeletePhotoForm(forms.Form):
+    delete_photo = forms.BooleanField(widget=forms.HiddenInput, initial=True)
 User = get_user_model()
 
 

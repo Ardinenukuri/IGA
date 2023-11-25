@@ -4,4 +4,5 @@
     <p>{{ photo.caption }}</p>
     <p><strong>Taken by {% get_poster_display photo.uploader %}</strong></p>
     <p>{{ photo.date_created|get_posted_at_display }}</p>
+    <a href="{% url 'edit_blog' photo.id %}">Delete Photo</a>
 </div>
