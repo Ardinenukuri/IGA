@@ -14,12 +14,6 @@
         <button type="submit" >Delete</button>
     </form>
     
-    <h4>Delete Photo?  {{ photo.title }}</h4>
-    <form method="post">
-        {{ delete_form }}
-        {% csrf_token %}
-        <button type="submit" >Delete</button>
-    </form>
     {% endblock %}
 
     

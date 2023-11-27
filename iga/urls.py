@@ -7,5 +7,6 @@ urlpatterns = [
     path('about-us/', views.about_us, name='about_us'),
     path('contact_us/', views.contact_us, name='contact_us'),
      path('privacy_and_policy/', views.privacy_and_policy, name='privacy_and_policy'),
-     path('edit/', EditPhotoView.as_view(), name='edit_photo'),
+     path('edit/<int:photo_id>', EditPhotoView.as_view(), name='edit_photo'),
+     
 ]

@@ -19,14 +19,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.views import (
-    LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
+    LoginView, LogoutView,PasswordChangeView, PasswordChangeDoneView
 )
 
 import authentification.views
 from iga.views import (
     PhotoAPIView, BlogAPIView, BlogContributorAPIView,
     FollowUsersView, ViewBlogView, EditBlogView,
-    PhotoUploadView, CreateMultiplePhotosView, HomeView, BlogAndPhotoUploadView, EditPhotoView
+    PhotoUploadView, CreateMultiplePhotosView, HomeView, BlogAndPhotoUploadView
 )
 
 from rest_framework.routers import DefaultRouter
@@ -62,7 +62,6 @@ urlpatterns = [
     path('iga/create', BlogAndPhotoUploadView.as_view(), name='blog_create'),
     path('iga/<int:blog_id>', ViewBlogView.as_view, name='view_blog'),
     path('iga/<int:blog_id>/edit', EditBlogView.as_view(), name='edit_blog'),
-    path('iga/<int:photo_id>/edit', EditPhotoView.as_view(), name='edit_photo'),
     path('photo/upload-multiple/', CreateMultiplePhotosView.as_view(), name='create_multiple_photos'),
     path('follow-users/', FollowUsersView.as_view(), name='follow_users'),
     path('api-auth/', include('rest_framework.urls')),

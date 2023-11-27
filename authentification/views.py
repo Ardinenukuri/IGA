@@ -11,6 +11,7 @@ def signup_page(request):
         form = forms.SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
+            print(user.groups.all())
             # auto-login user
             login(request, user)
             return redirect('home')

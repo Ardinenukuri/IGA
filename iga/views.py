@@ -1,6 +1,6 @@
 from itertools import chain
-
-
+from django.contrib import messages
+from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.paginator import Paginator
 from django.forms import formset_factory
@@ -308,6 +308,23 @@ class FollowUsersView(LoginRequiredMixin, View):
         context = {'form': form}
         return render(request, self.template_name, context=context)
    
+class PasswordChangeView(LoginRequiredMixin, View):
+    template_name = 'password_change_form.html'
+    success_message = "Your password was changed successfully."
+    success_url = reverse_lazy('password_change_done')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, self.success_message)
+        return response
+
+class PasswordChangeDoneView(LoginRequiredMixin, View):
+    template_name = 'password_change_done.html'
+
+    def get_success_url(self):
+       
+        return reverse_lazy('home')
+
 def photo_feed(request):
     photos = models.Photo.objects.filter(
         uploader__in=request.user.follows.all()).order_by('-date_created')
