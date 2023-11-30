@@ -110,36 +110,27 @@ class HomeView(LoginRequiredMixin, View):
     context_object_name = 'blog_posts'
 
     def get(self, request, *args, **kwargs):
+        # If not logged in, redirect or handle unauthenticated users as needed
         if not request.user.is_authenticated:
-            return render(request, 'iga/index.html')  # Redirect or handle unauthenticated users as needed
+            return render(request, 'iga/index.html')
 
+        # Retrieve all blogs and photos without user-specific filters
+        blogs = Blog.objects.all()
+        photos = Photo.objects.all()
 
-        blogs = Blog.objects.filter(
-           Q(contributors__in=[request.user]) | Q(contributors__in=request.user.follows.all()) | Q(starred=True))
-        photos = Photo.objects.filter(
-            uploader__in=[request.user]).exclude(
-            blog__in=blogs,
-            )
-
-        
-
-        
-
+        # Combine blogs and photos and order by date_created
         blogs_and_photos = sorted(
             chain(blogs, photos),
             key=lambda instance: instance.date_created,
             reverse=True
         )
+
+        # Paginate the result
         paginator = Paginator(blogs_and_photos, self.paginate_by)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context = {'page_obj': page_obj, 'blogs': blogs}
-        print("Blogs and Photos:", blogs_and_photos)
-
-
         return render(request, self.template_name, context=context)
-
-
 
 
    
@@ -293,21 +284,27 @@ class CreateMultiplePhotosView(LoginRequiredMixin, View):
 class FollowUsersView(LoginRequiredMixin, View):
     template_name = 'iga/follow_users_form.html'
 
-
     def get(self, request, *args, **kwargs):
         form = FollowUsersForm(instance=request.user)
         context = {'form': form}
         return render(request, self.template_name, context=context)
 
-
     def post(self, request, *args, **kwargs):
         form = FollowUsersForm(request.POST, instance=request.user)
         if form.is_valid():
-            form.save()
+            followed_user = form.save()
+
+            # Add a success message
+            messages.success(
+                request,
+                f"You are now following {followed_user.username}."
+            )
+
             return redirect('home')
+
+        # If form is not valid, render the form again with errors
         context = {'form': form}
         return render(request, self.template_name, context=context)
-   
 class PasswordChangeView(LoginRequiredMixin, View):
     template_name = 'password_change_form.html'
     success_message = "Your password was changed successfully."
@@ -359,6 +356,5 @@ def privacy_and_policy(request):
 
 
    
-
 
 

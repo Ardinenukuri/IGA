@@ -57,7 +57,7 @@ urlpatterns = [
     path('home/', HomeView.as_view(), name='home'),
     path('signup/', authentification.views.signup_page, name='signup'),
     path('photo/upload/', PhotoUploadView.as_view(), name='photo_upload'),
-    path('profile-photo/upload', authentification.views.upload_profile_photo,
+    path('profile-photo/upload/', authentification.views.upload_profile_photo,
          name='upload_profile_photo'),
     path('iga/create', BlogAndPhotoUploadView.as_view(), name='blog_create'),
     path('iga/<int:blog_id>', ViewBlogView.as_view, name='view_blog'),
