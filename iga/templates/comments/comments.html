@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Comments</h2>
+
+    {% for comment in comments %}
+        <p>{{ comment.user.username }} - {{ comment.timestamp }}</p>
+        <p>{{ comment.text }}</p>
+        
+<hr>
+    {% endfor %}
+
+    <form method="post" action="{% url 'comments' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Post Comment</button>
+    </form>
+{% endblock %}

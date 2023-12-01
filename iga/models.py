@@ -3,6 +3,7 @@ from django.db import models
 from PIL import Image
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from authentification.models import User
 
 class Post(models.Model):
     title= models.CharField(max_length=200)
@@ -67,3 +68,14 @@ class BlogContributor(models.Model):
             
             class Meta:
                  unique_together = ('contributor', 'blog')
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} - {self.timestamp}'
+    
+    def user_can_delete(self, user):
+        return user == self.user

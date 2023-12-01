@@ -26,7 +26,7 @@ import authentification.views
 from iga.views import (
     PhotoAPIView, BlogAPIView, BlogContributorAPIView,
     FollowUsersView, ViewBlogView, EditBlogView,
-    PhotoUploadView, CreateMultiplePhotosView, HomeView, BlogAndPhotoUploadView
+    PhotoUploadView, CreateMultiplePhotosView, HomeView, BlogAndPhotoUploadView, CommentView
 )
 
 from rest_framework.routers import DefaultRouter
@@ -72,6 +72,7 @@ urlpatterns = [
     path('iga/', include('iga.urls')),
     path('leave/', include('leave.urls')),
     path('', authentification.views.index, name='index'),
+    path('comments/', CommentView.as_view(), name='comments'),
   
     
 

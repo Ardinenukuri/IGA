@@ -6,7 +6,8 @@ from django.core.paginator import Paginator
 from django.forms import formset_factory
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Blog
+from .models import Blog,Comment
+from .forms import CommentForm
 
 
 
@@ -352,9 +353,22 @@ def privacy_and_policy(request):
     return render(request, 'iga/privacy_and_policy.html')
     
 
+class CommentView(View):
+    template_name = 'comments/comments.html'
+    
 
+    def get(self, request, *args, **kwargs):
+        comments = Comment.objects.all()
+        form = CommentForm()
+        return render(request, self.template_name, {'comments': comments, 'form': form})
 
-
-   
-
-
+    def post(self, request, *args, **kwargs):
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.user = request.user
+            new_comment.save()
+            return redirect('comments')
+        comments = Comment.objects.all()
+        return render(request, self.template_name, {'comments': comments, 'form': form})
+    

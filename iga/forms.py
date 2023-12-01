@@ -23,3 +23,8 @@ class FollowUsersForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['follows']
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = models.Comment
+        fields = ['text']
